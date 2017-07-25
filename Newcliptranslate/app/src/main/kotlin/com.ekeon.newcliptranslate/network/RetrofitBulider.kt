@@ -14,28 +14,28 @@ import retrofit2.converter.gson.GsonConverterFactory
  * Created by Bridge on 2017-07-14.
  */
 
-val gson = GsonBuilder().setExclusionStrategies(object : ExclusionStrategy {
-    override fun shouldSkipField(f: FieldAttributes?): Boolean {
-        return f?.declaringClass == RealmObject::class.java
+    val gson = GsonBuilder().setExclusionStrategies(object : ExclusionStrategy {
+        override fun shouldSkipField(f: FieldAttributes?): Boolean {
+            return f?.declaringClass == RealmObject::class.java
+        }
+
+        override fun shouldSkipClass(clazz: Class<*>?): Boolean {
+            return false
+        }
+    }).create()
+
+    val retrofit: Retrofit = Retrofit.Builder()
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .baseUrl("https://openapi.naver.com/v1/language/")
+            .client(createOkhttps())
+            .build()
+
+    fun createOkhttps(): OkHttpClient {
+        val builder: OkHttpClient.Builder = OkHttpClient.Builder()
+        val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        builder.addInterceptor(interceptor)
+
+        return builder.build()
     }
-
-    override fun shouldSkipClass(clazz: Class<*>?): Boolean {
-        return false
-    }
-}).create()
-
-val retrofit: Retrofit = Retrofit.Builder()
-        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .addConverterFactory(GsonConverterFactory.create(gson))
-        .baseUrl("https://openapi.naver.com/v1/language/")
-        .client(createOkhttps())
-        .build()
-
-fun createOkhttps(): OkHttpClient {
-    val builder: OkHttpClient.Builder = OkHttpClient.Builder()
-    val interceptor: HttpLoggingInterceptor = HttpLoggingInterceptor()
-    interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-    builder.addInterceptor(interceptor)
-
-    return builder.build()
-}
